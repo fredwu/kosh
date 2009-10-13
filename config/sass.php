@@ -25,7 +25,7 @@ $config['sub_folder'] = 'sass';
  *
  * DEFAULT: APPPATH.'cache/sass'
  */
-$config['cache_folder'] = APPPATH.'cache/kosass';
+$config['cache_folder'] = APPPATH.'cache/kosh/sass';
 
 /**
  * Web accessible css folder

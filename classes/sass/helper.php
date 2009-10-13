@@ -1,12 +1,18 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 /**
- * Sass helper.
+ * Sass helper class for Kohana
  *
- * @package			Kohaml
- * @author			Justin Hernandez <justin@transphorm.com>
- * @copyright		2009
+ * @todo       TODO: KO3 compatibility check
+ * @package    Kosh
+ * @subpackage Sass
+ * @author     Justin Hernandez <justin@transphorm.com>
+ * @author     Fred Wu <fred@wuit.com>
+ * @author     Fred Wu [Envato] <fred@envato.com>
+ * @version    based on Kohaml 1.0.2
+ * @version    0.1
+ * @license    http://www.opensource.org/licenses/mit-license.php
  */
-class sass
+class Sass_Helper
 {
 
 	// files array
@@ -42,7 +48,7 @@ class sass
 	private static function handler($files, $production, $inline)
 	{
 		// set variables
-		self::$cache_folder = Kohana::config('kosass.cache_folder');
+		self::$cache_folder = Kohana::config('sass.cache_folder');
 		
 		// if files is not an array convert to one
 		if ( ! is_array($files)) $files = array($files);
@@ -54,24 +60,24 @@ class sass
 		self::get_files_path();
 		
 		// load cache library
-		$cache =  new Kohaml_Cache('kosass');
+		$cache =  new Haml_Cache('sass');
 		// check for debug
-		$debug = TRUE; //Kohana::config('kosass.debug');
-		// init Kosass
-		$kosass = new Kosass($debug);
+		$debug = TRUE; //Kohana::config('sass.debug');
+		// init Sass
+		$sass = new Sass($debug);
 		
 		// loop files
 		foreach (self::$files as $file)
 		{
 			// add cache file name
 			self::$cache_files[] = $cache->check($file);
-			$name = basename($file, '.'.Kohana::config('kosass.ext'));
+			$name = basename($file, '.'.Kohana::config('sass.ext'));
 		
-			// if cache file does not exists then cache output from Kohaml
+			// if cache file does not exists then cache output from Haml
 			 if ( ! $cache->skip() || $debug)
 			{
 				// put file contents into an array then pass to render
-				$output = $kosass->compile(file($file), $name);
+				$output = $sass->compile(file($file), $name);
 				// cache output
 				if ( ! $debug) $cache->cache($output);
 			}
@@ -86,8 +92,8 @@ class sass
 	 */
 	private static function get_files_path()
 	{
-		$base = Kohana::config('kosass.base_folder');
-		$sub = Kohana::config('kosass.sub_folder');
+		$base = Kohana::config('sass.base_folder');
+		$sub = Kohana::config('sass.sub_folder');
 		// find each sass file
 		foreach (self::$files as &$file)
 				$file = Kohana::find_file($base, $sub.'/'.$file, TRUE, 'sass');

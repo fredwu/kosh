@@ -1,15 +1,20 @@
-<?php
+<?php defined('SYSPATH') OR die('No direct access allowed.');
 /**
- * Kosass library to parse sass files.
+ * Sass class for Kohana
  *
- * @package        Kohaml
- * @author         Justin Hernandez <justin@transphorm.com>
- * @version        1.0.2
- * @license        http://www.opensource.org/licenses/isc-license.txt
+ * @todo       TODO: KO3 compatibility check
+ * @package    Kosh
+ * @subpackage Sass
+ * @author     Justin Hernandez <justin@transphorm.com>
+ * @author     Fred Wu <fred@wuit.com>
+ * @author     Fred Wu [Envato] <fred@envato.com>
+ * @version    based on Kohaml 1.0.2
+ * @version    0.1
+ * @license    http://www.opensource.org/licenses/mit-license.php
  */
-class Kosass_Core
+class Sass
 {
-	// Use Kosass without Kohana
+	// Use Sass without Kohana
 	private $standalone = FALSE;
 	// debug?
 	private $debug;
@@ -46,7 +51,7 @@ class Kosass_Core
 	
 
 	/**
-	 * Load initial settings. Make changes here if you are using Kohaml in
+	 * Load initial settings. Make changes here if you are using Haml in
 	 * standalone mode. Check out replace_rules() for adding your own custom rules.
 	 */
 	public function __construct($debug = FALSE)
@@ -58,7 +63,7 @@ class Kosass_Core
 
 		$this->quotes = ($this->standalone)
 					  ? $quotes
-					  : Kohana::config('kosass.quotes');
+					  : Kohana::config('sass.quotes');
 	}
 
 	/**
@@ -73,10 +78,10 @@ class Kosass_Core
 	{
 		// if $contents are empty throw error
 		if (empty($contents))
-			throw new Exception("Kosass template '$script' can not be found.");
+			throw new Exception("Sass template '$script' can not be found.");
 		// set script name if in Kohana add the config's default extension
-		$this->script = (!$this->standalone)
-					  ? $script.'.'.Kohana::config('kohaml.ext')
+		$this->script = ( ! $this->standalone)
+					  ? $script.'.'.Kohana::config('haml.ext')
 					  : $script;
 		// parse file contents into iterator
 		$this->file = new ArrayIterator($contents);
@@ -580,7 +585,7 @@ class Kosass_Core
 	 */
 	private function add_new_line()
 	{
-		if (!(substr($this->line, -1) == "\n")) $this->line .= "\n";
+		if ( ! (substr($this->line, -1) == "\n")) $this->line .= "\n";
 	}
 
 	/*
@@ -643,7 +648,7 @@ class Kosass_Core
 	 */
 	private function add_close($tag)
 	{
-		if (!$this->close_self) $this->close_tags[] = $this->indent.$tag;
+		if ( ! $this->close_self) $this->close_tags[] = $this->indent.$tag;
 	}
 
 	/**
@@ -698,7 +703,7 @@ class Kosass_Core
 		private function raise_error($lang)
 		{
 			$line = $this->lineno+1;
-			throw new Kohana_Exception("kosass.$lang", " Error on line #{$line}.");
+			throw new Kohana_Exception("sass.$lang", " Error on line #{$line}.");
 		}
 
 	/**

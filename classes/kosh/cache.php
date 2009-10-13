@@ -1,30 +1,37 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 /**
- * Kohaml Cache Library
+ * Haml Cache class for Kohana
  *
- * @package			Kohaml
- * @author			Justin Hernandez <justin@transphorm.com>
- * @copyright		2009
+ * @package    Kosh
+ * @subpackage Kosh
+ * @author     Justin Hernandez <justin@transphorm.com>
+ * @author     Fred Wu <fred@wuit.com>
+ * @author     Fred Wu [Envato] <fred@envato.com>
+ * @version    based on Kohaml 1.0.2
+ * @version    0.1
+ * @license    http://www.opensource.org/licenses/mit-license.php
  */
-class Kohaml_Cache_Core
+class Kosh_Cache
 {
 	// skip caching?
 	private $skip;
 	// file name
 	private $file;
-	// cache time
-	private $cache_time;
+	// file type
+	private $type;
+	// cache time to live
+	private $cache_ttl;
 	
 
 	/**
-	 * Set type, kohaml or kosass
+	 * Set type, haml or sass
 	 *
 	 * @param  string  $type
 	 */
-	public function __construct($type)
+	public function __construct($type = 'haml')
 	{
 		$this->type = $type;
-		$this->cache_time = Kohana::config($this->type.'.cache_time');
+		$this->cache_ttl = Kohana::config($this->type.'.cache_ttl');
 	}
 
 	/**
@@ -51,7 +58,7 @@ class Kohaml_Cache_Core
 	}
 	
 	/**
-	 * Cache output from Kohaml.
+	 * Cache output from Haml.
 	 *
 	 * @param  string  $output
 	 */
@@ -68,7 +75,7 @@ class Kohaml_Cache_Core
 	 */
 	private function check_directory()
 	{
-		if (!is_dir(Kohana::config($this->type.'.cache_folder')))
+		if ( ! is_dir(Kohana::config($this->type.'.cache_folder')))
 			mkdir(Kohana::config($this->type.'.cache_folder'));
 	}
 
@@ -84,11 +91,16 @@ class Kohaml_Cache_Core
 		if (is_file($cache_file))
 		{
 			// touch file. helps determine if template was modified
-			touch($cache_file);
+			// FIXME: I'm not sure why this was needed, 'touch'ing the file will make the cached file to always regenerate
+			// touch($cache_file);
+			
 			// check if template has been mofilemtime($cache_file)dified and is newer than cache
-			// allow $cache_time difference
-			if ((filemtime($this->file)) > (filemtime($cache_file)+$this->cache_time))
+			// allow $cache_ttl difference
+			if ((filemtime($this->file)-$this->cache_ttl) > filemtime($cache_file))
+			{
+				echo time(), ' ', (filemtime($this->file)+$this->cache_ttl), ' ', (filemtime($cache_file));
 				$this->skip = TRUE;
+			}
 		}
 		
 		return $cache_file;

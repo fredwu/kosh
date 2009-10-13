@@ -1,15 +1,20 @@
-<?php
+<?php defined('SYSPATH') OR die('No direct access allowed.');
 /**
- * Kohaml library to parse haml files.
+ * Haml class for Kohana
  *
- * @package        Kohaml
- * @author         Justin Hernandez <justin@transphorm.com>
- * @version        1.0.2
- * @license        http://www.opensource.org/licenses/isc-license.txt
+ * @todo       TODO: verify standalone mode
+ * @package    Kosh
+ * @subpackage Haml
+ * @author     Justin Hernandez <justin@transphorm.com>
+ * @author     Fred Wu <fred@wuit.com>
+ * @author     Fred Wu [Envato] <fred@envato.com>
+ * @version    based on Kohaml 1.0.2
+ * @version    0.1
+ * @license    http://www.opensource.org/licenses/mit-license.php
  */
-class Kohaml_Core
+class Haml
 {
-	// Use Kohaml without Kohana
+	// Use Haml without Kohana
 	private $standalone = FALSE;
 	// debug?
 	private $debug;
@@ -51,7 +56,7 @@ class Kohaml_Core
 	private $script;
 
 	/**
-	 * Load initial settings. Make changes here if you are using Kohaml in
+	 * Load initial settings. Make changes here if you are using Haml in
 	 * standalone mode. Check out replace_rules() for adding your own custom rules.
 	 */
 	public function __construct($debug = FALSE)
@@ -63,7 +68,7 @@ class Kohaml_Core
 
 		$this->quotes = ($this->standalone)
 					  ? $quotes
-					  : Kohana::config('kohaml.quotes');
+					  : Kohana::config('haml.quotes');
 	}
 
 	/**
@@ -79,8 +84,8 @@ class Kohaml_Core
 		if (empty($contents))
 			throw new Exception("Haml template '$script' can not be found.");
 		// set script name if in Kohana add the config's default extension
-		$this->script = (!$this->standalone)
-					  ? $script.'.'.Kohana::config('kohaml.ext')
+		$this->script = ( ! $this->standalone)
+					  ? $script.'.'.Kohana::config('haml.ext')
 					  : $script;
 		// parse file contents into iterator
 		$this->file = new ArrayIterator($contents);
@@ -109,6 +114,17 @@ class Kohaml_Core
 		$this->close_nested(count($this->close_tags), TRUE);
 		if ($this->debug) die();
 		return trim($this->output);
+	}
+	
+	/**
+	 * Generates the Haml file/output
+	 *
+	 * @todo   TODO: standalone mode
+	 * @return string
+	 */
+	public function generate()
+	{
+		
 	}
 
 	/**
@@ -174,11 +190,11 @@ class Kohaml_Core
 		else if ($first == '|')
 		{
 			preg_match('/^([ \t]+)?/', $this->line, $m);
-			$this->tag = '[[KOHAML::ESCAPE]]';
+			$this->tag = '[[HAML::ESCAPE]]';
 			$this->line = $this->indent.trim(str_replace('|', '', $this->line));
 			$this->add_close('');
 			// if closing tag is not on this line than php is nested
-			if (!strpos($this->line, '?>')) $this->nested_php = TRUE;
+			if ( ! strpos($this->line, '?>')) $this->nested_php = TRUE;
 		}
 		// is current line php?
 		else if (preg_match('/^([ \t]+)?(\<\?).+(\?\>)?/', $this->line, $m))
@@ -188,7 +204,7 @@ class Kohaml_Core
 			{
 				// step over lines and add to output until closing tag is found
 				// or end of file
-				while ((!preg_match('/\?\>/', $this->file->current())) AND $this->file->valid())
+				while (( ! preg_match('/\?\>/', $this->file->current())) AND $this->file->valid())
 				{
 					$this->output .= $this->file->current();
 					$this->file->next();
@@ -207,7 +223,7 @@ class Kohaml_Core
 		else
 		{
 			preg_match('/^([ \t]+)?/', $this->line, $m);
-			$this->tag = '[[KOHAML::ESCAPE]]';
+			$this->tag = '[[HAML::ESCAPE]]';
 			$this->add_close('');
 		}
 		// look ahead at next line to determine depth and close tags
@@ -256,7 +272,7 @@ class Kohaml_Core
 		// indented
 		else if ($next > $curr)
 		{
-			if ($this->tag != '[[KOHAML::ESCAPE]]')
+			if ($this->tag != '[[HAML::ESCAPE]]')
 			{
 				// if text is present then indent add 2 spaces and put it one it's own line
 				if ($this->text) $this->text = "\n".$this->indent.'  '.$this->text;
@@ -274,7 +290,7 @@ class Kohaml_Core
 	 */
 	private function add_new_line()
 	{
-		if (!(substr($this->line, -1) == "\n")) $this->line .= "\n";
+		if ( ! (substr($this->line, -1) == "\n")) $this->line .= "\n";
 	}
 
 	/*
@@ -282,7 +298,7 @@ class Kohaml_Core
 	 */
 	private function close()
 	{
-		if ($this->tag != '[[KOHAML::ESCAPE]]')
+		if ($this->tag != '[[HAML::ESCAPE]]')
 		{
 			$this->line = $this->indent.$this->tag.$this->text;
 			$this->line .= trim(array_pop($this->close_tags));
@@ -376,7 +392,7 @@ class Kohaml_Core
 					? " $type=\"$val\""
 					: " $type='$val'";
 		}
-		$replace = array('[[KOHAML::ATTR]]', '&nbsp;');
+		$replace = array('[[HAML::ATTR]]', '&nbsp;');
 		$fill = array($attrs, ' ');
 		$this->line = str_replace($replace, $fill, $this->line);
 		// replace php
@@ -384,7 +400,7 @@ class Kohaml_Core
 		{
 			foreach($this->php as $php)
 			{
-				$this->line = preg_replace('/\[\[KOHAML::PHP\]\]/', $php, $this->line, 1);
+				$this->line = preg_replace('/\[\[HAML::PHP\]\]/', $php, $this->line, 1);
 			}
 		}
 	}
@@ -402,7 +418,7 @@ class Kohaml_Core
 		$replace[] = '$1 <?= $2 ?>&nbsp;';
 
 		// Kohana specific replace rules
-		if (!$this->standalone)
+		if ( ! $this->standalone)
 		{
 			// RULE #2 load for loading sub-views
 			$rule[] = '/^([ \t]+)?load\((.+)\)/';
@@ -440,15 +456,15 @@ class Kohaml_Core
 		switch ($first)
 		{
 			case '%':
-				$this->tag = "<$element"."[[KOHAML::ATTR]]$this->close_self>";
+				$this->tag = "<$element"."[[HAML::ATTR]]$this->close_self>";
 				$this->add_close("</$element>");
 				break;
 			case '#':
-				$this->tag = "<div[[KOHAML::ATTR]]$this->close_self>";
+				$this->tag = "<div[[HAML::ATTR]]$this->close_self>";
 				$this->add_close('</div>');
 				break;
 			case '.':
-				$this->tag = "<div[[KOHAML::ATTR]]$this->close_self>";
+				$this->tag = "<div[[HAML::ATTR]]$this->close_self>";
 				$this->add_close('</div>');
 				break;
 		}
@@ -461,7 +477,7 @@ class Kohaml_Core
 	 */
 	private function add_close($tag)
 	{
-		if (!$this->close_self) $this->close_tags[] = $this->indent.$tag;
+		if ( ! $this->close_self) $this->close_tags[] = $this->indent.$tag;
 	}
 
 	/**
@@ -549,7 +565,7 @@ class Kohaml_Core
 			}
 		}
 		// strip out php
-		$this->line = preg_replace('/(\<\?.+?\?\>)/', '[[KOHAML::PHP]]', $this->line);
+		$this->line = preg_replace('/(\<\?.+?\?\>)/', '[[HAML::PHP]]', $this->line);
 	}
 
 	/**
